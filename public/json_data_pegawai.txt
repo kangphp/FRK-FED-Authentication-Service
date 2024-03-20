@@ -1,0 +1,1 @@
+{"result":"Ok","data":{"pegawai":[{"pegawai_id":70,"nip":"0310090021","nama":"Mario E. S. Simaremare, S.Kom., M.Sc.","email":"mario@del.ac.id","user_name":"mario","user_id":1435,"alias ":"MSS","posisi ":"Dosen","status_pegawai":"A"}]}}

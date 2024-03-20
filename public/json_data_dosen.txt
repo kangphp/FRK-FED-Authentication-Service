@@ -1,0 +1,1 @@
+{"result":"Ok","data":{"dosen":[{"pegawai_id":70,"dosen_id":48,"nip":"0310090021","nama":"Mario E. S. Simaremare, S.Kom., M.Sc.","email":"mario@del.ac.id","prodi_id":9,"prodi":"S1 Sistem Informasi","jabatan_akademik":"A","jabatan_akademik_desc":"Tenaga Pengajar","jenjang_pendidikan":"Diploma 3, Sarjana, Master, ","nidn":"0128058805","user_id":1435}]}}
