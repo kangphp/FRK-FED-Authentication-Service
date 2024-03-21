@@ -26,6 +26,7 @@ class AuthController extends Controller
 
                     $responseArray = [
                         'result' => true,
+                        'request_token' => $data['token'],
                         'data' =>
                             [
                                 'user' => [
@@ -49,7 +50,7 @@ class AuthController extends Controller
             }
         } catch (ValidationException $e) {
             // Tangani pengecualian (exception) jika terjadi validasi gagal atau metode bukan POST
-            return response()->json(['result' => false, 'error' => $e->getMessage()], 200); // 405 adalah kode status "Method Not Allowed"
+            return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
         }
     }
 
