@@ -13,8 +13,8 @@ class AuthController extends Controller
         try {
             if ($request->isMethod('POST')) {
                 $requestLogin = Http::asForm()->post('https://cis-dev.del.ac.id/api/jwt-api/do-auth', [
-                    'username' => $request->usernameLogin,
-                    'password' => $request->passwordLogin
+                    'username' => $request->username,
+                    'password' => $request->password
                 ])->body();
 
                 $data = json_decode($requestLogin, true);
@@ -26,7 +26,8 @@ class AuthController extends Controller
 
                     $responseArray = [
                         'result' => true,
-                        'request_token' => $data['token'],
+                        'token' => $data['token'],
+                        'refresh_token' => $data['refresh_token'],
                         'data' =>
                             [
                                 'user' => [
@@ -36,12 +37,11 @@ class AuthController extends Controller
                                     'role' => $data['user']['role'],
                                     'status' => $data['user']['status'],
                                     'jabatan' => $data['user']['jabatan'],
+                                    'data_lengkap' => $this->getDataDosen($data['user']['user_id'], $data['token'])
                                 ],
-                                'data_lengkap' => $this->getDataDosen($data['user']['user_id'], $data['token'])
                             ]
                     ];
 
-//                    return response()->json($responseArray, 200);
                     return response()->json($responseArray, 200);
                 }
             } else {
