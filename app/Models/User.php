@@ -2,32 +2,101 @@
 
 namespace App\Models;
 
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Laravel\Lumen\Auth\Authorizable;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Auth\Authenticatable as AuthenticableTrait;
+use Illuminate\Support\Facades\Http;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+class User implements Authenticatable, JWTSubject
 {
-    use Authenticatable, Authorizable, HasFactory;
+    use AuthenticableTrait;
+
+    protected $username;
+
+    public function __construct($username)
+    {
+        $this->username = $username;
+    }
 
     /**
-     * The attributes that are mass assignable.
+     * Lakukan autentikasi pengguna melalui layanan eksternal.
      *
-     * @var string[]
+     * @param string $password
+     * @return bool
      */
-    protected $fillable = [
-        'name', 'email',
-    ];
+    public function authenticate($password)
+    {
+        try {
+            // Kirim permintaan ke layanan eksternal untuk otentikasi
+            $response = Http::asForm()->post('https://cis-dev.del.ac.id/api/jwt-api/do-auth', [
+                'username' => $this->username,
+                'password' => $password
+            ])->body();
+
+//            print_r($response);
+            $data = json_decode($response, true);
+
+            if ($data['success'] == false) {
+                return false;
+            } else {
+                $this->setTokenData($data['token']);
+
+                $this->setData($data['user']);
+
+                return true;
+            }
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 
     /**
-     * The attributes excluded from the model's JSON form.
+     * Mendapatkan identitas pengguna.
      *
-     * @var string[]
+     * @return mixed
      */
-    protected $hidden = [
-        'password',
-    ];
+    public function getAuthIdentifier()
+    {
+        return $this->username;
+    }
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getAuthIdentifier();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public function setTokenData($token)
+    {
+        $this->tokenData = $token;
+    }
+
+    public function getTokenData()
+    {
+        return $this->tokenData;
+    }
+
+    public function setData($data)
+    {
+        $this->data = $data;
+    }
+
+    public function getData()
+    {
+        return $this->data;
+    }
 }

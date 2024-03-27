@@ -3,82 +3,71 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
+use App\Models\User;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    /**
+     * Handle an authentication attempt.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(Request $request)
     {
+        // Validasi permintaan
+        $validator = Validator::make($request->all(), [
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+
         try {
-            if ($request->isMethod('POST')) {
-                $requestLogin = Http::asForm()->post('https://cis-dev.del.ac.id/api/jwt-api/do-auth', [
-                    'username' => $request->usernameLogin,
-                    'password' => $request->passwordLogin
-                ])->body();
+            // Periksa jika validasi gagal
+            if ($validator->fails()) {
+                throw ValidationException::withMessages(['error' => 'Valid Input']);
+            }
 
-                $data = json_decode($requestLogin, true);
+            // Membuat instance User
+            $user = new User($request->username);
 
-                if ($data['result'] == false) {
-                    throw ValidationException::withMessages(['error' => 'Invalid Username or Password']);
-                } else {
-//                    $this->getDataDosen($data['user']['user_id'], $data['token']);
+            // Lakukan autentikasi
+            if ($user->authenticate($request->password)) {
+                // Autentikasi berhasil, generate token JWT
+                $token = JWTAuth::fromUser($user);
 
-                    $responseArray = [
-                        'result' => true,
-                        'request_token' => $data['token'],
-                        'data' =>
-                            [
-                                'user' => [
-                                    'user_id' => $data['user']['user_id'],
-                                    'username' => $data['user']['username'],
-                                    'email' => $data['user']['email'],
-                                    'role' => $data['user']['role'],
-                                    'status' => $data['user']['status'],
-                                    'jabatan' => $data['user']['jabatan'],
-                                ],
-                                'data_lengkap' => $this->getDataDosen($data['user']['user_id'], $data['token'])
-                            ]
-                    ];
+                $arrayResponse = [
+                    'result' => true,
+                    'token_auth' => $token,
+                    'token_service' => $user->getTokenData(),
+                    'data' => $user->getData()
+                ];
 
-//                    return response()->json($responseArray, 200);
-                    return response()->json($responseArray, 200);
-                }
+                // Return token JWT sebagai respons
+                return response()->json($arrayResponse, 200);
             } else {
-                // Jika metode bukan POST, lemparkan pengecualian
-                throw ValidationException::withMessages(['error' => 'Method Not Allowed']);
+                // Autentikasi gagal
+                throw ValidationException::withMessages(['error' => 'Unauthorized']);
             }
         } catch (ValidationException $e) {
-            // Tangani pengecualian (exception) jika terjadi validasi gagal atau metode bukan POST
             return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
         }
     }
 
-    private function getDataDosen($uid, $token)
+    /**
+     * Get the authenticated User.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function me()
     {
-        $requestDataDosen = Http::withToken($token)->asForm()->post('https://cis-dev.del.ac.id/api/library-api/dosen?userid=' . $uid)->body();
-        $jsonDataDosen = json_decode($requestDataDosen, true);
+        // Mendapatkan pengguna yang terautentikasi
+        $user = Auth::user();
 
-        $pegawaiId = $jsonDataDosen['data']['dosen'][0]['pegawai_id'];
-
-        $requestDataPegawai = Http::withToken($token)->asForm()->post('https://cis-dev.del.ac.id/api/library-api/pegawai?pegawaiid=' . $pegawaiId)->body();
-        $jsonDataPegawai = json_decode($requestDataPegawai,true);
-
-        $arrayData = [
-            'dosen' => [
-                "pegawai_id" => $jsonDataDosen['data']['dosen'][0]['pegawai_id'],
-                "dosen_id" => $jsonDataDosen['data']['dosen'][0]['dosen_id'],
-                "nip" => $jsonDataDosen['data']['dosen'][0]['nip'],
-                "nama" => $jsonDataDosen['data']['dosen'][0]['nama'],
-                "prodi_id" => $jsonDataDosen['data']['dosen'][0]['prodi_id'],
-                "prodi" => $jsonDataDosen['data']['dosen'][0]['prodi'],
-                "jabatan_akademik" => $jsonDataDosen['data']['dosen'][0]['jabatan_akademik'],
-                "jabatan_akademik_desc" => $jsonDataDosen['data']['dosen'][0]['jabatan_akademik_desc'],
-                "jenjang_pendidikan" => $jsonDataDosen['data']['dosen'][0]['jenjang_pendidikan'],
-                "nidn" => $jsonDataDosen['data']['dosen'][0]['nidn'],
-            ],
-            'pegawai' => $jsonDataPegawai['data']['pegawai'][0]
-        ];
-        return [$arrayData];
+        // Return informasi pengguna sebagai respons
+        return response()->json($user);
     }
 }

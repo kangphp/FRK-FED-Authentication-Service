@@ -59,7 +59,7 @@ $app->singleton(
 |
 */
 
-$app->configure('app');
+$app->configure('auth');
 
 /*
 |--------------------------------------------------------------------------
@@ -79,12 +79,15 @@ $app->configure('app');
  $app->middleware([
      App\Http\Middleware\InvalidMethodHandler::class,
      App\Http\Middleware\DefaultResponseMiddleware::class,
+     App\Http\Middleware\VerifyJWTToken::class,
  ]);
 
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
+ $app->routeMiddleware([
+     'auth' => App\Http\Middleware\Authenticate::class,
+     'jwt.verify' => \App\Http\Middleware\VerifyJwtToken::class,
+ ]);
 
+class_alias(Tymon\JWTAuth\Facades\JWTAuth::class, 'JWTAuth');
 /*
 |--------------------------------------------------------------------------
 | Register Service Providers
@@ -97,8 +100,9 @@ $app->configure('app');
 */
 
 // $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\AuthServiceProvider::class);
+$app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
+$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

@@ -18,9 +18,11 @@
 //});
 
 
-
 $router->group(['prefix' => 'api'], function () use ($router) {
-   $router->group(['prefix' => 'user'], function () use ($router) {
-       $router->post('login', 'AuthController@login');
-   });
+    $router->group(['prefix' => 'user'], function () use ($router) {
+        $router->post('login', 'AuthController@login');
+        $router->post('get', ['middleware' => 'VerifyJwtToken', 'uses' => 'AuthController@login']);
+    });
 });
+
+
