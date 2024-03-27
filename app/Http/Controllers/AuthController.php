@@ -79,6 +79,6 @@ class AuthController extends Controller
             ],
             'pegawai' => $jsonDataPegawai['data']['pegawai'][0]
         ];
-        return [$arrayData];
+        return $arrayData;
     }
 }
