@@ -23,4 +23,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
    $router->group(['prefix' => 'user'], function () use ($router) {
        $router->post('login', 'AuthController@login');
    });
+
+   $router->group(['prefix' => 'admin'], function () use ($router) {
+       $router->post('generate-tanggal', 'AdminController@generate_tanggal');
+   });
 });

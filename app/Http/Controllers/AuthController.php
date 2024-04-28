@@ -21,9 +21,24 @@ class AuthController extends Controller
 
                 if ($data['result'] == false) {
                     throw ValidationException::withMessages(['error' => 'Invalid Username or Password']);
+                } else if ($data['user']['role'] != 'Dosen') {
+                    $responseArray = [
+                        'result' => true,
+                        'token' => $data['token'],
+                        'refresh_token' => $data['refresh_token'],
+                        'data' =>
+                            [
+                                'user' => [
+                                    'user_id' => $data['user']['user_id'],
+                                    'username' => $data['user']['username'],
+                                    'email' => $data['user']['email'],
+                                    'role' => $data['user']['role'],
+                                    'status' => $data['user']['status'],
+                                    'jabatan' => $data['user']['jabatan']
+                                ],
+                            ]
+                    ];
                 } else {
-//                    $this->getDataDosen($data['user']['user_id'], $data['token']);
-
                     $responseArray = [
                         'result' => true,
                         'token' => $data['token'],
@@ -41,9 +56,9 @@ class AuthController extends Controller
                                 ],
                             ]
                     ];
-
-                    return response()->json($responseArray, 200);
                 }
+
+                return response()->json($responseArray, 200);
             } else {
                 // Jika metode bukan POST, lemparkan pengecualian
                 throw ValidationException::withMessages(['error' => 'Method Not Allowed']);
