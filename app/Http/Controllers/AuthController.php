@@ -29,6 +29,7 @@ class AuthController extends Controller
                         'data' =>
                             [
                                 'user' => [
+                                    'token' => $data['token'],
                                     'user_id' => $data['user']['user_id'],
                                     'username' => $data['user']['username'],
                                     'email' => $data['user']['email'],
