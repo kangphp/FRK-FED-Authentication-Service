@@ -26,5 +26,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
    $router->group(['prefix' => 'admin'], function () use ($router) {
        $router->post('generate-tanggal', 'AdminController@generate_tanggal');
+
+       $router->post('get-tanggal', 'AdminController@get_tanggal');
    });
 });
