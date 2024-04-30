@@ -33,6 +33,7 @@ class AdminController extends Controller
             if (empty($token)) {
                 throw ValidationException::withMessages(['error' => 'Unauthorized']);
             }
+
             /**
              * Validasi role yang request
              */
@@ -49,6 +50,17 @@ class AdminController extends Controller
 
             $tgl_awal_pengisian = $request->get('tgl_awal_pengisian');
             $tgl_akhir_pengisian = $request->get('tgl_akhir_pengisian');
+
+            /**
+             * Pengecekan inputan yang di berikan sudah benar atau tidak
+             */
+
+            if (strtotime($tgl_akhir_pengisian) < strtotime($tgl_awal_pengisian))
+            {
+                throw ValidationException::withMessages(['error' => 'Tgl akhir pengisian harus lebih besar dari tgl awal pengisian']);
+            } else if (strtotime(date("Y-m-d")) > strtotime($tgl_awal_pengisian)) {
+                throw ValidationException::withMessages(['error' => 'Tanggal awal pengisian yang di tetapkan sudah lewat']);
+            }
 
             $periode_awal_approve_assesor_1 = $request->get('periode_awal_approve_assesor_1');
             $periode_akhir_approve_assesor_1 = $request->get('periode_akhir_approve_assesor_1');
