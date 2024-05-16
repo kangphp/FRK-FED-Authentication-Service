@@ -29,6 +29,7 @@ class AdminController extends Controller
     public function generate_tanggal(Request $request)
     {
         $token = request()->bearerToken();
+
         try {
             if (empty($token)) {
                 throw ValidationException::withMessages(['error' => 'Unauthorized']);
@@ -42,7 +43,7 @@ class AdminController extends Controller
                 throw ValidationException::withMessages(['error' => 'Empty Request']);
             }
 
-            if ($request->get('role') != 'Dosen') {
+            if ($request->get('role') != 'Staf Human Resources') {
                 throw ValidationException::withMessages(['error' => 'Unauthorized']);
             }
 
@@ -108,9 +109,9 @@ class AdminController extends Controller
 
             if ($request->type == "FRK")
             {
-                $data = generate_tanggal::all()->where('tipe', 'FRK')->sortByDesc('tgl_awal_pengisian');
+                $data = generate_tanggal::all()->where('tipe', 'FRK')->sortBy('tgl_awal_pengisian')->first();
             } else if ($request->type == "FED") {
-                $data = generate_tanggal::all()->where('tipe', 'FED')->sortByDesc('tgl_awal_pengisian');
+                $data = generate_tanggal::all()->where('tipe', 'FED')->sortBy('tgl_awal_pengisian')->first();
             }
 
         } catch (ValidationException $e) {
