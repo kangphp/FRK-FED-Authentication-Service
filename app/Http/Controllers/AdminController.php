@@ -31,9 +31,9 @@ class AdminController extends Controller
         $token = request()->bearerToken();
 
         try {
-            if (empty($token)) {
-                throw ValidationException::withMessages(['error' => 'Unauthorized']);
-            }
+            // if (empty($token)) {
+            //     throw ValidationException::withMessages(['error' => 'Unauthorized']);
+            // }
 
             /**
              * Validasi role yang request
@@ -93,9 +93,9 @@ class AdminController extends Controller
         $token = request()->bearerToken();
         try {
             // Validasi token dan request
-            if (empty($token)) {
-                throw ValidationException::withMessages(['error' => 'Unauthorized']);
-            }
+            // if (empty($token)) {
+            //     throw ValidationException::withMessages(['error' => 'Unauthorized']);
+            // }
 
             if(empty($request))
             {
@@ -109,9 +109,9 @@ class AdminController extends Controller
 
             if ($request->type == "FRK")
             {
-                $data = generate_tanggal::all()->where('tipe', 'FRK')->sortBy('tgl_awal_pengisian')->first();
+                $data = generate_tanggal::all()->where('tipe', 'FRK')->sortByDesc('tgl_awal_pengisian')->first();
             } else if ($request->type == "FED") {
-                $data = generate_tanggal::all()->where('tipe', 'FED')->sortBy('tgl_awal_pengisian')->first();
+                $data = generate_tanggal::all()->where('tipe', 'FED')->sortByDesc('tgl_awal_pengisian')->first();
             }
 
         } catch (ValidationException $e) {
@@ -119,5 +119,10 @@ class AdminController extends Controller
         }
 
         return response()->json(['result' => true, 'data' => $data], 201);
+    }
+
+    public function post_assign(Request $request)
+    {
+
     }
 }
