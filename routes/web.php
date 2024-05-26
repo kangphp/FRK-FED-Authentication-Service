@@ -28,5 +28,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
        $router->post('generate-tanggal', 'AdminController@generate_tanggal');
 
        $router->post('get-tanggal', 'AdminController@get_tanggal');
+
+       $router->get('get-eligible-asesor', 'AdminController@get_eligible_asesor');
    });
 });

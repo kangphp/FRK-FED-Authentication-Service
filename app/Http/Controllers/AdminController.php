@@ -56,8 +56,7 @@ class AdminController extends Controller
              * Pengecekan inputan yang di berikan sudah benar atau tidak
              */
 
-            if (strtotime($tgl_akhir_pengisian) < strtotime($tgl_awal_pengisian))
-            {
+            if (strtotime($tgl_akhir_pengisian) < strtotime($tgl_awal_pengisian)) {
                 throw ValidationException::withMessages(['error' => 'Tgl akhir pengisian harus lebih besar dari tgl awal pengisian']);
             } else if (strtotime(date("Y-m-d")) > strtotime($tgl_awal_pengisian)) {
                 throw ValidationException::withMessages(['error' => 'Tanggal awal pengisian yang di tetapkan sudah lewat']);
@@ -82,7 +81,7 @@ class AdminController extends Controller
                 'tahun_ajaran' => $tahun_ajaran
             ]);
 
-            return response()->json(['result' => true, 'data' =>  $tryGen], 201);
+            return response()->json(['result' => true, 'data' => $tryGen], 201);
         } catch (ValidationException $e) {
             return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
         }
@@ -97,18 +96,15 @@ class AdminController extends Controller
             //     throw ValidationException::withMessages(['error' => 'Unauthorized']);
             // }
 
-            if(empty($request))
-            {
+            if (empty($request)) {
                 throw ValidationException::withMessages(['error' => 'Empty Request']);
             }
 
-            if (!in_array($request->type, ['FRK', 'FED']))
-            {
+            if (!in_array($request->type, ['FRK', 'FED'])) {
                 throw ValidationException::withMessages(['error' => 'Invalid type entered']);
             }
 
-            if ($request->type == "FRK")
-            {
+            if ($request->type == "FRK") {
                 $data = generate_tanggal::all()->where('tipe', 'FRK')->sortByDesc('tgl_awal_pengisian')->first();
             } else if ($request->type == "FED") {
                 $data = generate_tanggal::all()->where('tipe', 'FED')->sortByDesc('tgl_awal_pengisian')->first();
@@ -124,5 +120,43 @@ class AdminController extends Controller
     public function post_assign(Request $request)
     {
 
+    }
+
+    public function get_eligible_asesor(Request $request)
+    {
+        $token = request()->bearerToken();
+
+        try {
+            $requestDataUnit = Http::withToken($token)->asForm()->post('https://cis-dev.del.ac.id/api/library-api/unit?nama=&id_unit=&limit=&with_member=')->body();
+
+            $data = json_decode($requestDataUnit, true);
+
+            $result = [];
+
+            foreach ($data['data']['unit'] as $unit) {
+                // Memeriksa apakah 'kepala' mengandung 'Ketua Program Studi' atau 'Dekan Fakultas'
+                $matchFound = false;
+                if (preg_match('/Ketua Program Studi|Dekan Fakultas|Wakil Rektor Bidang Perencanaan, Keuangan, dan Sumber Daya|Wakil Rektor Bidang Akademik dan Kemahasiswaan|\bREKTOR\b/i', $unit['kepala'])) {
+                    $matchFound = true;
+//                    $result[] = $unit;
+                } else if ($unit['name'] == "Rektorat") {
+                    // Loop melalui setiap anggota dalam unit
+                    foreach ($unit['anggota'] as $anggota) {
+                        if (preg_match('/Wakil Rektor Bidang Perencanaan, Keuangan, dan Sumber Daya|Wakil Rektor Bidang Akademik dan Kemahasiswaan/i', $anggota['jabatan'])) {
+                            $matchFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if ($matchFound) {
+                    $result[] = $unit;
+                }
+            }
+
+            return response()->json(['result' => true, 'data' => $result], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
+        }
     }
 }
