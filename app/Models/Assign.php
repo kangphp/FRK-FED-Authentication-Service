@@ -14,7 +14,8 @@ class Assign extends Model
     protected $fillable = [
         'id_pegawai',
         'tipe_asesor',
-        'semester',
+        'id_tanggal_frk',
+        'id_tanggal_fed',
         'program_studi',
         'fakultas',
     ];

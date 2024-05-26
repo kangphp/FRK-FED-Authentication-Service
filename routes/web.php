@@ -18,6 +18,7 @@
 //});
 
 
+use Illuminate\Http\Request;
 
 $router->group(['prefix' => 'api'], function () use ($router) {
    $router->group(['prefix' => 'user'], function () use ($router) {
@@ -30,5 +31,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
        $router->post('get-tanggal', 'AdminController@get_tanggal');
 
        $router->get('get-eligible-asesor', 'AdminController@get_eligible_asesor');
+
+       $router->post('assign-role','AdminController@post_assign');
    });
 });

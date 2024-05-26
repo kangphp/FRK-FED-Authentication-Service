@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id(); // Primary key, auto-incrementing ID
             $table->unsignedBigInteger('id_pegawai'); // Assuming id_pegawai is a foreign key to another table
             $table->enum('tipe_asesor', [1, 2, 3]); // Enum type for 1 or 2
+            $table->string('id_tanggal_frk');
+            $table->string('id_tanggal_fed');
             $table->string('semester'); // Assuming semester is a string
             $table->string('program_studi'); // Assuming program_studi is a string
             $table->string('fakultas'); // Assuming fakultas is a string
