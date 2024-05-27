@@ -124,19 +124,22 @@ class AdminController extends Controller
         $token = request()->bearerToken();
 
         try {
+            if (empty($token)) {
+                throw ValidationException::withMessages(['error' => 'Invalid token used']);
+            }
+
             $validator = Validator::make($request->all(), [
                 'id_pegawai' => 'numeric|required',
                 'id_FRK' => "numeric|required",
                 'id_FED' => "numeric|required",
-                'jabatan' => 'string|required'
+                'jabatan' => 'string|required',
             ]);
 
             if ($validator->fails()) {
                 throw new ValidationException($validator);
             }
 
-            if (preg_match('/Ketua Program Studi/i', $request->jabatan))
-            {
+            if (preg_match('/Ketua Program Studi/i', $request->jabatan)) {
                 $tipeAsesor = 2;
             } else if (preg_match('/Dekan Fakultas/i', $request->jabatan)) {
                 $tipeAsesor = 1;
@@ -147,10 +150,16 @@ class AdminController extends Controller
             }
 
             $requestDataDosen = Http::withToken($token)->asForm()->post('https://cis-dev.del.ac.id/api/library-api/dosen?pegawaiid=' . $request->id_pegawai)->body();
+
+            if (json_decode($requestDataDosen, true) == null) {
+                throw ValidationException::withMessages(['error' => 'Invalid token used']);
+            }
+
             $prodiDosen = json_decode($requestDataDosen, true)['data']['dosen'][0]['prodi'];
 
-            $prodiFITE = ['S1 Informatika','S1 Sistem Informasi','S1 Teknik Elektro'];
-            $prodiVokasi = ['DIII Teknologi Informasi','DIII Teknologi Komputer', 'DIV Teknologi Rekayasa Perangkat Lunak'];
+
+            $prodiFITE = ['S1 Informatika', 'S1 Sistem Informasi', 'S1 Teknik Elektro'];
+            $prodiVokasi = ['DIII Teknologi Informasi', 'DIII Teknologi Komputer', 'DIV Teknologi Rekayasa Perangkat Lunak'];
             $prodiBP = ['S1 Teknik Bioproses'];
             $prodiFTI = ['S1 Manajemen Rekayasa'];
 
@@ -167,13 +176,17 @@ class AdminController extends Controller
             $tryAssign = [
                 'id_pegawai' => $request->get('id_pegawai'),
                 'tipe_asesor' => $tipeAsesor,
-                'program_studi' => $prodiDosen,
                 'id_tanggal_frk' => $request->id_FRK,
                 'id_tanggal_fed' => $request->id_FED,
+                'program_studi' => $prodiDosen,
                 'fakultas' => $fakultas,
             ];
 
-            $tryAssign = Assign::create($tryAssign);
+            $tryAssign = new Assign($tryAssign);
+
+            $tryAssign->save();
+        } catch(\Illuminate\Database\QueryException $ex){
+            return response()->json(['result' => false, 'error' => 'Hubungi Developer!'], 405); // 405 adalah kode status "Method Not Allowed"
         } catch (ValidationException $e) {
             return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
         }
@@ -186,11 +199,21 @@ class AdminController extends Controller
         $token = request()->bearerToken();
 
         try {
+            if (empty($token))
+            {
+                throw ValidationException::withMessages(['error' => 'Invalid token used']);
+            }
+
             $requestDataUnit = Http::withToken($token)->asForm()->post('https://cis-dev.del.ac.id/api/library-api/unit?nama=&id_unit=&limit=&with_member=')->body();
 
             $data = json_decode($requestDataUnit, true);
 
             $result = [];
+
+            if ($data == null)
+            {
+                throw ValidationException::withMessages(['error' => 'Invalid token used']);
+            }
 
             foreach ($data['data']['unit'] as $unit) {
                 // Memeriksa apakah 'kepala' mengandung 'Ketua Program Studi' atau 'Dekan Fakultas'

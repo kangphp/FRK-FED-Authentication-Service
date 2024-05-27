@@ -17,7 +17,6 @@ return new class extends Migration
             $table->enum('tipe_asesor', [1, 2, 3]); // Enum type for 1 or 2
             $table->string('id_tanggal_frk');
             $table->string('id_tanggal_fed');
-            $table->string('semester'); // Assuming semester is a string
             $table->string('program_studi'); // Assuming program_studi is a string
             $table->string('fakultas'); // Assuming fakultas is a string
             $table->timestamps(); // Created at and updated at timestamps
