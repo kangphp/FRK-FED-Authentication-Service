@@ -33,5 +33,6 @@ $router->group(['prefix' => 'api'], function () use ($router) {
        $router->get('get-eligible-asesor', 'AdminController@get_eligible_asesor');
 
        $router->post('assign-role','AdminController@post_assign');
+       $router->get('check-asesor/{idPegawai}', 'AdminController@checkAsesor');
    });
 });
