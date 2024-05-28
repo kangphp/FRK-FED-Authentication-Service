@@ -23,6 +23,7 @@ class GenerateTanggalSeeder extends Seeder
             'periode_awal_approve_assesor_2' => '2025-06-30',
             'periode_akhir_approve_assesor_2' => '2025-06-30',
             'tahun_ajaran' => '2023/2024',
+            'semester' => 'Ganjil'
         ]);
 
         generate_tanggal::create([
@@ -34,6 +35,7 @@ class GenerateTanggalSeeder extends Seeder
             'periode_awal_approve_assesor_2' => '2024-01-01',
             'periode_akhir_approve_assesor_2' => '2024-12-31',
             'tahun_ajaran' => '2023/2024',
+            'semester' => 'Ganjil'
         ]);
 
         // Tambahkan data lainnya jika diperlukan

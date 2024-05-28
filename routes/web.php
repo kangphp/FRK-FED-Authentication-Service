@@ -36,6 +36,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
        $router->post('assign-role','AdminController@post_assign');
 
+       $router->post('delete-assign-role','AdminController@delete_assign');
+
        $router->get('get-asesor', 'AdminController@get_asesor');
 
        $router->get('check-asesor/{idPegawai}', 'AdminController@checkAsesor');

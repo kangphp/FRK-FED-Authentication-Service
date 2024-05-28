@@ -139,6 +139,7 @@ class AdminController extends Controller
         return response()->json(['result' => true, 'data' => $data], 201);
     }
 
+
     public function post_assign(Request $request)
     {
         $token = request()->bearerToken();
@@ -220,6 +221,45 @@ class AdminController extends Controller
         }
 
         return response()->json(['result' => true, 'data' => $tryAssign], 201);
+    }
+
+    public function delete_assign(Request $request)
+    {
+        $token = request()->bearerToken();
+
+        try {
+            if (empty($token)) {
+                throw ValidationException::withMessages(['error' => 'Invalid token used']);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'id_pegawai' => 'numeric|required',
+                'id_FRK' => "numeric|required",
+                'id_FED' => "numeric|required",
+                'jabatan' => 'string|required',
+            ]);
+
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+
+            $assign = Assign::where('id_pegawai', $request->id_pegawai)
+                ->where('id_tanggal_frk', $request->id_FRK)
+                ->where('id_tanggal_fed', $request->id_FED)
+                ->first();
+
+            if (!$assign) {
+                throw ValidationException::withMessages(['error' => 'Asesor not found for the given details']);
+            }
+
+            $assign->delete();
+        } catch (\Illuminate\Database\QueryException $ex) {
+            return response()->json(['result' => false, 'error' => 'Hubungi Developer!'], 405); // 405 adalah kode status "Method Not Allowed"
+        } catch (ValidationException $e) {
+            return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
+        }
+
+        return response()->json(['result' => true, 'data' => 'Asesor successfully deleted'], 201);
     }
 
 //    public function getAsesorByID(Request $request)
