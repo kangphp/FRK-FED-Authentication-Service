@@ -159,10 +159,18 @@ class AdminController extends Controller
                 throw new ValidationException($validator);
             }
 
+            if (Assign::where('id_pegawai', $request->id_pegawai)
+                ->where('id_tanggal_frk', $request->id_FRK)
+                ->where('id_tanggal_fed', $request->id_FED)
+                ->count() != 0)
+            {
+                throw ValidationException::withMessages(['error' => 'This user already assign as asesor for this Semester']);
+            }
+
             if (preg_match('/Ketua Program Studi/i', $request->jabatan)) {
-                $tipeAsesor = 2;
-            } else if (preg_match('/Dekan Fakultas/i', $request->jabatan)) {
                 $tipeAsesor = 1;
+            } else if (preg_match('/Dekan Fakultas/i', $request->jabatan)) {
+                $tipeAsesor = 2;
             } else if (preg_match('/Wakil Rektor|\bREKTOR\b/i', $request->jabatan)) {
                 $tipeAsesor = 3;
             } else {
@@ -205,7 +213,7 @@ class AdminController extends Controller
             $tryAssign = new Assign($tryAssign);
 
             $tryAssign->save();
-        } catch(\Illuminate\Database\QueryException $ex){
+        } catch (\Illuminate\Database\QueryException $ex) {
             return response()->json(['result' => false, 'error' => 'Hubungi Developer!'], 405); // 405 adalah kode status "Method Not Allowed"
         } catch (ValidationException $e) {
             return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
@@ -214,13 +222,36 @@ class AdminController extends Controller
         return response()->json(['result' => true, 'data' => $tryAssign], 201);
     }
 
+//    public function getAsesorByID(Request $request)
+//    {
+//        $token = request()->bearerToken();
+//    }
+
+    public function get_asesor(Request $request)
+    {
+        $token = request()->bearerToken();
+
+        try {
+            if (empty($token)) {
+                throw ValidationException::withMessages(['error' => 'Invalid token used']);
+            }
+
+            $data = Assign::all();
+
+        } catch (\Illuminate\Database\QueryException $ex) {
+            return response()->json(['result' => false, 'error' => 'Hubungi Developer! =>' . $ex->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
+        } catch (ValidationException $e) {
+            return response()->json(['result' => false, 'error' => $e->getMessage()], 405);
+        }
+        return response()->json(['result' => true, 'data' => $data], 200);
+    }
+
     public function get_eligible_asesor(Request $request)
     {
         $token = request()->bearerToken();
 
         try {
-            if (empty($token))
-            {
+            if (empty($token)) {
                 throw ValidationException::withMessages(['error' => 'Invalid token used']);
             }
 
@@ -230,8 +261,7 @@ class AdminController extends Controller
 
             $result = [];
 
-            if ($data == null)
-            {
+            if ($data == null) {
                 throw ValidationException::withMessages(['error' => 'Invalid token used']);
             }
 
@@ -262,8 +292,7 @@ class AdminController extends Controller
 
             foreach (json_decode($requestDataByUnit, true)['data']['unit'] as $unit) {
                 foreach ($unit['anggota'] as $anggota) {
-                    if (preg_match('/Wakil Rektor Bidang Perencanaan, Keuangan, dan Sumber Daya|Wakil Rektor Bidang Akademik dan Kemahasiswaan/i', $anggota['jabatan']))
-                    {
+                    if (preg_match('/Wakil Rektor Bidang Perencanaan, Keuangan, dan Sumber Daya|Wakil Rektor Bidang Akademik dan Kemahasiswaan/i', $anggota['jabatan'])) {
                         $resultWR = [[
                             'unit_id' => $unit['unit_id'],
                             'name' => $unit['name'],
