@@ -19,5 +19,6 @@ class generate_tanggal extends Model
         'periode_awal_approve_assesor_2',
         'periode_akhir_approve_assesor_2',
         'tahun_ajaran',
+        'semester'
     ];
 }

@@ -71,6 +71,7 @@ class AdminController extends Controller
             $periode_akhir_approve_assesor_2 = $request->get('periode_akhir_approve_assesor_2');
 
             $tahun_ajaran = $request->get('tahun_ajaran');
+            $semester = $request->get('semester');
 
             $tryGen = generate_tanggal::create([
                 'tipe' => $typeTanggal,
@@ -80,7 +81,8 @@ class AdminController extends Controller
                 'periode_akhir_approve_assesor_1' => $periode_akhir_approve_assesor_1,
                 'periode_awal_approve_assesor_2' => $periode_awal_approve_assesor_2,
                 'periode_akhir_approve_assesor_2' => $periode_akhir_approve_assesor_2,
-                'tahun_ajaran' => $tahun_ajaran
+                'tahun_ajaran' => $tahun_ajaran,
+                'semester' => $semester
             ]);
 
             return response()->json(['result' => true, 'data' => $tryGen], 201);
