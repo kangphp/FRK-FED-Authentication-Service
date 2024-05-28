@@ -271,4 +271,15 @@ class AdminController extends Controller
             return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
         }
     }
+
+    public function checkAsesor($idPegawai){
+        $res = Assign::where("id_pegawai", $idPegawai)->first();
+
+        if($res != null){
+            return response()->json(['result' => true, 'data' => $res], 200);
+        } else {
+            return response()->json(['result' => false, 'data' => null], 200);
+        }
+
+    }
 }
