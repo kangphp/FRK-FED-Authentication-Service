@@ -32,6 +32,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
        $router->get('get-all-tanggal', 'AdminController@getAllTanggal');
 
+       $router->get('get-list-tahun-ajaran', 'AdminController@getListTahunAjaran');
+
        $router->get('get-eligible-asesor', 'AdminController@get_eligible_asesor');
 
        $router->post('assign-role','AdminController@post_assign');

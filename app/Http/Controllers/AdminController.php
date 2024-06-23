@@ -139,6 +139,24 @@ class AdminController extends Controller
         return response()->json(['result' => true, 'data' => $data], 201);
     }
 
+    public function getListTahunAjaran()
+    {
+        $token = request()->bearerToken();
+        try {
+            // Validasi token dan request
+            if (empty($token)) {
+                throw ValidationException::withMessages(['error' => 'Unauthorized']);
+            }
+
+            $data = generate_tanggal::all()->where('tipe', 'FED')->sortByDesc('tgl_awal_pengisian');
+
+        } catch (ValidationException $e) {
+            return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
+        }
+
+        return response()->json(['result' => true, 'data' => $data], 201);
+    }
+
 
     public function post_assign(Request $request)
     {
