@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Assign;
 use App\Models\generate_tanggal;
+use App\Models\Rencana;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
@@ -113,6 +114,40 @@ class AdminController extends Controller
             } else if ($request->type == "FED") {
                 $data = generate_tanggal::all()->where('tipe', 'FED')->sortByDesc('tgl_awal_pengisian')->first();
             }
+        } catch (ValidationException $e) {
+            return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
+        }
+
+        return response()->json(['result' => true, 'data' => $data], 201);
+    }
+
+    public function getDataTanggal($id)
+    {
+        $token = request()->bearerToken();
+        try {
+            // Validasi token dan request
+            if (empty($token)) {
+                throw ValidationException::withMessages(['error' => 'Unauthorized']);
+            }
+
+            $data = generate_tanggal::all()->where('id', $id)->sortByDesc('tgl_awal_pengisian');
+        } catch (ValidationException $e) {
+            return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
+        }
+
+        return response()->json(['result' => true, 'data' => $data], 201);
+    }
+
+    public function getListDosenByIdTahunAjaran($id)
+    {
+        $token = request()->bearerToken();
+        try {
+            // Validasi token dan request
+            if (empty($token)) {
+                throw ValidationException::withMessages(['error' => 'Unauthorized']);
+            }
+
+            $data = Rencana::where('id_tanggal_fed', $id)->distinct()->orderBy('id_dosen', 'asc')->get(['id_dosen']);
 
         } catch (ValidationException $e) {
             return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
@@ -131,7 +166,6 @@ class AdminController extends Controller
             }
 
             $data = generate_tanggal::all()->sortByDesc('tgl_awal_pengisian');
-
         } catch (ValidationException $e) {
             return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
         }
@@ -149,7 +183,6 @@ class AdminController extends Controller
             }
 
             $data = generate_tanggal::all()->where('tipe', 'FED')->sortByDesc('tgl_awal_pengisian');
-
         } catch (ValidationException $e) {
             return response()->json(['result' => false, 'error' => $e->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
         }
@@ -181,8 +214,8 @@ class AdminController extends Controller
             if (Assign::where('id_pegawai', $request->id_pegawai)
                 ->where('id_tanggal_frk', $request->id_FRK)
                 ->where('id_tanggal_fed', $request->id_FED)
-                ->count() != 0)
-            {
+                ->count() != 0
+            ) {
                 throw ValidationException::withMessages(['error' => 'This user already assign as asesor for this Semester']);
             }
 
@@ -280,10 +313,10 @@ class AdminController extends Controller
         return response()->json(['result' => true, 'data' => 'Asesor successfully deleted'], 201);
     }
 
-//    public function getAsesorByID(Request $request)
-//    {
-//        $token = request()->bearerToken();
-//    }
+    //    public function getAsesorByID(Request $request)
+    //    {
+    //        $token = request()->bearerToken();
+    //    }
 
     public function get_asesor(Request $request)
     {
@@ -295,7 +328,6 @@ class AdminController extends Controller
             }
 
             $data = Assign::all();
-
         } catch (\Illuminate\Database\QueryException $ex) {
             return response()->json(['result' => false, 'error' => 'Hubungi Developer! =>' . $ex->getMessage()], 405); // 405 adalah kode status "Method Not Allowed"
         } catch (ValidationException $e) {
@@ -328,7 +360,7 @@ class AdminController extends Controller
                 $matchFound = false;
                 if (preg_match('/Ketua Program Studi|Dekan Fakultas|Wakil Rektor Bidang Perencanaan, Keuangan, dan Sumber Daya|Wakil Rektor Bidang Akademik dan Kemahasiswaan|\bREKTOR\b/i', $unit['kepala'])) {
                     $matchFound = true;
-//                    $result[] = $unit;
+                    //                    $result[] = $unit;
                 } else if ($unit['name'] == "Rektorat") {
                     // Loop melalui setiap anggota dalam unit
                     foreach ($unit['anggota'] as $anggota) {
@@ -377,14 +409,14 @@ class AdminController extends Controller
         }
     }
 
-    public function checkAsesor($idPegawai){
+    public function checkAsesor($idPegawai)
+    {
         $res = Assign::where("id_pegawai", $idPegawai)->first();
 
-        if($res != null){
+        if ($res != null) {
             return response()->json(['result' => true, 'data' => $res], 200);
         } else {
             return response()->json(['result' => false, 'data' => null], 200);
         }
-
     }
 }

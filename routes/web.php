@@ -34,6 +34,10 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
        $router->get('get-list-tahun-ajaran', 'AdminController@getListTahunAjaran');
 
+       $router->get('get-list-dosen/{id}', 'AdminController@getListDosenByIdTahunAjaran');
+
+       $router->get('get-data-tanggal/{id}', 'AdminController@getDataTanggal');
+
        $router->get('get-eligible-asesor', 'AdminController@get_eligible_asesor');
 
        $router->post('assign-role','AdminController@post_assign');
